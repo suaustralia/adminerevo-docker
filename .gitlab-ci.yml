@@ -1,0 +1,27 @@
+
+variables:
+  CONTAINER_IMAGE: australia-southeast1-docker.pkg.dev/suaus-dev/general/docker/adminerevo:$CI_COMMIT_REF_SLUG
+  CONTAINER_RELEASE_IMAGE: australia-southeast1-docker.pkg.dev/suaus-dev/general/docker/adminerevo:latest
+
+build:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+  # This relies on GOOGLE_APPLICATION_CREDENTIALS being set and pointing to the Google Service Account JSON file
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CONTAINER_IMAGE --cache=true
+
+release-image:
+  stage: release
+  needs:
+    - build
+  image:
+    name: gcr.io/go-containerregistry/gcrane:debug
+    entrypoint: [""]
+  # This relies on GOOGLE_APPLICATION_CREDENTIALS being set and pointing to the Google Service Account JSON file
+  script:
+    - gcrane cp $CONTAINER_IMAGE $CONTAINER_RELEASE_IMAGE
+
+  only:
+    - main # This should be set to the default branch, which should be the current "mainline" image
