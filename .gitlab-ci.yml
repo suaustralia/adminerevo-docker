@@ -13,7 +13,7 @@ build:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CONTAINER_IMAGE --cache=true
 
 release-image:
-  stage: release
+  stage: build
   needs:
     - build
   image:
